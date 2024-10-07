@@ -41,7 +41,7 @@ jobs:
           key: ${{ secrets.KEY_DEV }}
         run: |
           # Comando para publicar el asset en Exchange
-          mvn -B -s ./maven/settings.xml clean deploy \
+          mvn -B -s .maven/settings.xml clean deploy \
             -DbusinessGroupId=${{ env.businessGroupId }} \
             -DconnectedAppClientId=${{ env.connectedAppClientId }} \
             -DconnectedAppClientSecret=${{ env.connectedAppClientSecret }} \
@@ -61,7 +61,7 @@ jobs:
           key: ${{ secrets.KEY_DEV }}
         run: |
           # Comando para desplegar la aplicación
-          mvn -B -s ./maven/settings.xml clean deploy -DmuleDeploy \
+          mvn -B -s .maven/settings.xml clean deploy -DmuleDeploy \
             -DbusinessGroupId=${{ env.businessGroupId }} \
             -DconnectedAppClientId=${{ env.connectedAppClientId }} \
             -DconnectedAppClientSecret=${{ env.connectedAppClientSecret }} \
@@ -93,7 +93,27 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
 
-      - name: Publish to Exchange and Deploy
+      - name: Publish to Exchange
+        env:
+          businessGroupId: ${{ secrets.BUSINESS_GROUP_ID }}
+          connectedAppClientId: ${{ secrets.CONNECTED_APP_CLIENT_ID }}
+          connectedAppClientSecret: ${{ secrets.CONNECTED_APP_CLIENT_SECRET }}
+          target: ${{ secrets.TARGET }}
+          applicationName: metrodora-testcicd-dev
+          replicas: ${{ secrets.REPLICAS }}
+          vCores: ${{ secrets.VCORES }}
+          key: ${{ secrets.KEY_PRO }}
+        run: |
+          # Comando para publicar el asset en Exchange
+          mvn -B -s .maven/settings.xml clean deploy \
+            -DbusinessGroupId=${{ env.businessGroupId }} \
+            -DconnectedAppClientId=${{ env.connectedAppClientId }} \
+            -DconnectedAppClientSecret=${{ env.connectedAppClientSecret }} \
+            -Dkey=${{ env.key }}
+          
+        continue-on-error: true
+        
+      - name: Deploy application
         env:
           businessGroupId: ${{ secrets.BUSINESS_GROUP_ID }}
           connectedAppClientId: ${{ secrets.CONNECTED_APP_CLIENT_ID }}
@@ -102,18 +122,10 @@ jobs:
           applicationName: metrodora-testcicd-pro
           replicas: ${{ secrets.REPLICAS }}
           vCores: ${{ secrets.VCORES }}
+          key: ${{ secrets.KEY_PRO }}
         run: |
-          # Comando para publicar el asset en Exchange
-          echo "Intentando publicar el asset en Exchange..."
-          mvn -B -s .maven/settings.xml clean deploy \
-            -DbusinessGroupId=${{ env.businessGroupId }} \
-            -DconnectedAppClientId=${{ env.connectedAppClientId }} \
-            -DconnectedAppClientSecret=${{ env.connectedAppClientSecret }} \
-            -Dkey=${{ secrets.KEY_PRO }} || echo "Proceso de publicación terminado, continuando con el despliegue..."
-
           # Comando para desplegar la aplicación
-          echo "Desplegando la aplicación en el entorno ${{ env.env }}..."
-          mvn -B -s settings.xml clean deploy -DmuleDeploy \
+          mvn -B -s .maven/settings.xml clean deploy -DmuleDeploy \
             -DbusinessGroupId=${{ env.businessGroupId }} \
             -DconnectedAppClientId=${{ env.connectedAppClientId }} \
             -DconnectedAppClientSecret=${{ env.connectedAppClientSecret }} \
@@ -122,4 +134,4 @@ jobs:
             -DapplicationName=${{ env.applicationName }} \
             -Dreplicas=${{ env.replicas }} \
             -DvCores=${{ env.vCores }} \
-            -Dkey=${{ secrets.KEY_PRO }}
+            -Dkey=${{ env.key }}
