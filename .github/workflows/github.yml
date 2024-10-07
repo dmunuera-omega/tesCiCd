@@ -61,7 +61,7 @@ jobs:
             -DbusinessGroupId=$businessGroupId \
             -DconnectedAppClientId=$connectedAppClientId \
             -DconnectedAppClientSecret=$connectedAppClientSecret \
-            -Denv=DEV \
+            -Denv=dev \
             -Dtarget=$target \
             -DapplicationName=$applicationName \
             -Dreplicas=$replicas \
