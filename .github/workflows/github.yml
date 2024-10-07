@@ -1,68 +1,85 @@
-# .github/workflows/deploy.yml
-name: CI_CD Pipeline
+name: CI/CD Pipeline
 
 on:
   push:
     branches:
-      - main
+      - develop  # Despliega automáticamente en desarrollo y preprod
+  workflow_dispatch:  # Permite ejecutar manualmente para despliegue en producción
+    inputs:
+      target-environment:
+        description: 'Despliegue en el entorno deseado (solo se usa para producción)'
+        required: true
+        default: 'prod'
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-
     strategy:
       matrix:
-        branch: [main]
+        branch: [develop, main]
+    if: github.ref == 'refs/heads/develop' || github.event_name == 'workflow_dispatch'
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v3
 
       - name: Set up JDK 11
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v3
         with:
-          distribution: 'adopt'
           java-version: '11'
 
       - name: Cache Maven packages
-        uses: actions/cache@v4
+        uses: actions/cache@v3
         with:
           path: ~/.m2/repository
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
           restore-keys: |
             ${{ runner.os }}-maven-
 
-      - name: Publish to Exchange
-        env:
-          businessGroupId: ${{ secrets.BUSINESS_GROUP_ID }}
-          connectedAppClientId: ${{ secrets.CONNECTED_APP_CLIENT_ID }}
-          connectedAppClientSecret: ${{ secrets.CONNECTED_APP_CLIENT_SECRET }}
-          target: ${{ secrets.TARGET }}
-          applicationName: metrodora-testcicd-dev
-          replicas: 1
-          vCores: 0.1
+      - name: Determine Environment
+        id: environment
         run: |
-          mvn -B -s .maven/settings.xml clean deploy \
-            -DbusinessGroupId=$businessGroupId \
-            -DconnectedAppClientId=$connectedAppClientId \
-            -DconnectedAppClientSecret=$connectedAppClientSecret 
+          if [[ "${{ github.ref }}" == "refs/heads/develop" ]]; then
+            echo "env=dev" >> $GITHUB_ENV
+            echo "key=${{ secrets.DEV_KEY }}" >> $GITHUB_ENV
+          elif [[ "${{ github.event.inputs.target-environment }}" == "prod" ]]; then
+            echo "env=prod" >> $GITHUB_ENV
+            echo "key=${{ secrets.PROD_KEY }}" >> $GITHUB_ENV
+          else
+            echo "Error: No se pudo determinar el entorno."
+            exit 1
 
-      - name: Deploy
+      - name: Publish to Exchange and Deploy
         env:
           businessGroupId: ${{ secrets.BUSINESS_GROUP_ID }}
           connectedAppClientId: ${{ secrets.CONNECTED_APP_CLIENT_ID }}
           connectedAppClientSecret: ${{ secrets.CONNECTED_APP_CLIENT_SECRET }}
+          env: ${{ env.env }}
           target: ${{ secrets.TARGET }}
-          applicationName: metrodora-testcicd-dev
-          replicas: 1
-          vCores: 0.1
+          applicationName: metrodora-testcicd-${{ env.env }}
+          replicas: ${{ secrets.REPLICAS }}
+          vCores: ${{ secrets.VCORES }}
+          key: ${{ env.key }}
         run: |
-          mvn -B -s .maven/settings.xml clean deploy -DmuleDeploy \
-            -DbusinessGroupId=$businessGroupId \
-            -DconnectedAppClientId=$connectedAppClientId \
-            -DconnectedAppClientSecret=$connectedAppClientSecret \
-            -Denv=dev \
-            -Dtarget=$target \
-            -DapplicationName=$applicationName \
-            -Dreplicas=$replicas \
-            -DvCores=$vCores 
+          echo "Desplegando en el entorno: ${{ env.env }}"
+
+          # Comando para publicar el asset en Exchange
+          echo "Intentando publicar el asset en Exchange..."
+          mvn -B -s settings.xml clean deploy \
+            -DbusinessGroupId=${{ env.businessGroupId }} \
+            -DconnectedAppClientId=${{ env.connectedAppClientId }} \
+            -DconnectedAppClientSecret=${{ env.connectedAppClientSecret }} \
+            -Dkey=${{ env.key }} || echo "Proceso de publicación terminado, continuando con el despliegue..."
+
+          # Comando para desplegar la aplicación
+          echo "Desplegando la aplicación en el entorno ${{ env.env }}..."
+          mvn -B -s settings.xml clean deploy -DmuleDeploy \
+            -DbusinessGroupId=${{ env.businessGroupId }} \
+            -DconnectedAppClientId=${{ env.connectedAppClientId }} \
+            -DconnectedAppClientSecret=${{ env.connectedAppClientSecret }} \
+            -Denv=${{ env.env }} \
+            -Dtarget=${{ env.target }} \
+            -DapplicationName=${{ env.applicationName }} \
+            -Dreplicas=${{ env.replicas }} \
+            -DvCores=${{ env.vCores }} \
+            -Dkey=${{ env.key }}
