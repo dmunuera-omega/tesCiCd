@@ -9,7 +9,7 @@ on:
       target-environment:
         description: 'Despliegue en el entorno deseado (solo se usa para producción)'
         required: true
-        default: 'prod'
+        default: 'pro'
 
 jobs:
   build-and-deploy:
