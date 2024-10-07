@@ -35,17 +35,17 @@ jobs:
           connectedAppClientId: ${{ secrets.CONNECTED_APP_CLIENT_ID }}
           connectedAppClientSecret: ${{ secrets.CONNECTED_APP_CLIENT_SECRET }}
           target: ${{ secrets.TARGET }}
-          applicationName: metrodora-testcicd-${{ env.env }}
+          applicationName: metrodora-testcicd-dev
           replicas: ${{ secrets.REPLICAS }}
           vCores: ${{ secrets.VCORES }}
-          key: ${{ env.key }}
+          key: ${{ secrets.KEY_DEV }}
         run: |
           # Comando para publicar el asset en Exchange
           mvn -B -s settings.xml clean -fai deploy \
             -DbusinessGroupId=${{ env.businessGroupId }} \
             -DconnectedAppClientId=${{ env.connectedAppClientId }} \
             -DconnectedAppClientSecret=${{ env.connectedAppClientSecret }} \
-            -Dkey=${{ secrets.KEY_DEV }}
+            -Dkey=${{ env.key }}
           
         continue-on-error: true
         
