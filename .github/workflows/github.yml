@@ -41,13 +41,13 @@ jobs:
           key: ${{ secrets.KEY_DEV }}
         run: |
           # Comando para publicar el asset en Exchange
-          mvn -B -s ./maven/settings.xml clean -fai deploy \
+          mvn -B -s ./maven/settings.xml clean deploy \
             -DbusinessGroupId=${{ env.businessGroupId }} \
             -DconnectedAppClientId=${{ env.connectedAppClientId }} \
             -DconnectedAppClientSecret=${{ env.connectedAppClientSecret }} \
             -Dkey=${{ env.key }}
           
-        continue-on-error: true
+        #continue-on-error: true
         
       - name: Deploy application
         env:
@@ -105,7 +105,7 @@ jobs:
         run: |
           # Comando para publicar el asset en Exchange
           echo "Intentando publicar el asset en Exchange..."
-          mvn -B -s settings.xml clean deploy \
+          mvn -B -s .maven/settings.xml clean deploy \
             -DbusinessGroupId=${{ env.businessGroupId }} \
             -DconnectedAppClientId=${{ env.connectedAppClientId }} \
             -DconnectedAppClientSecret=${{ env.connectedAppClientSecret }} \
