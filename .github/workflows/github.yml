@@ -53,7 +53,7 @@ jobs:
           connectedAppClientId: ${{ secrets.CONNECTED_APP_CLIENT_ID }}
           connectedAppClientSecret: ${{ secrets.CONNECTED_APP_CLIENT_SECRET }}
           target: ${{ secrets.TARGET }}
-          applicationName: metrodora-testCiCd-dev
+          applicationName: metrodora-testcicd-dev
           replicas: 1
           vCores: 0.1
         run: |
