@@ -55,12 +55,6 @@
 							</services>
 						</integrations>
 						<!-- Añadir properties necesarias -->
-						<properties>
-							<env>${env}</env>
-						</properties>
-						<secureProperties>
-							<key>${key}</key>
-						</secureProperties>
 					</cloudhub2Deployment>
 				</configuration>
 			</plugin>
