@@ -49,7 +49,7 @@ jobs:
           
         continue-on-error: true
         
-      - name: Publish to Exchange
+      - name: Deploy application
         env:
           businessGroupId: ${{ secrets.BUSINESS_GROUP_ID }}
           connectedAppClientId: ${{ secrets.CONNECTED_APP_CLIENT_ID }}
@@ -58,7 +58,7 @@ jobs:
           applicationName: metrodora-testcicd-${{ env.env }}
           replicas: ${{ secrets.REPLICAS }}
           vCores: ${{ secrets.VCORES }}
-          key: ${{ env.key }}
+          key: ${{ secrets.KEY_DEV }}
         run: |
           # Comando para desplegar la aplicación
           mvn -B -s settings.xml clean deploy -DmuleDeploy \
@@ -71,6 +71,7 @@ jobs:
             -Dreplicas=${{ env.replicas }} \
             -DvCores=${{ env.vCores }} \
             -Dkey=${{ secrets.KEY_DEV }}
+            
   build-and-deploy-pro:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
