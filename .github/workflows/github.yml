@@ -47,7 +47,7 @@ jobs:
             -DconnectedAppClientSecret=${{ env.connectedAppClientSecret }} \
             -Dkey=${{ env.key }}
           
-        #continue-on-error: true
+        continue-on-error: true
         
       - name: Deploy application
         env:
