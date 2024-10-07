@@ -13,7 +13,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-		<app.runtime>4.4.0-20220622</app.runtime>
+		<app.runtime>4.6.7</app.runtime>
 		<mule.maven.plugin.version>4.1.0</mule.maven.plugin.version>
 	</properties>
 
@@ -31,6 +31,7 @@
 				<extensions>true</extensions>
 				<configuration>
 					<cloudhub2Deployment>
+						<releaseChannel>LTS</releaseChannel>
 						<uri>https://eu1.anypoint.mulesoft.com</uri>
 						<provider>MC</provider>
 						<environment>${env}</environment>
