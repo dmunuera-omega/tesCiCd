@@ -29,7 +29,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
 
-      - name: Publish to Exchange and Deploy
+      - name: Publish to Exchange
         env:
           businessGroupId: ${{ secrets.BUSINESS_GROUP_ID }}
           connectedAppClientId: ${{ secrets.CONNECTED_APP_CLIENT_ID }}
@@ -40,18 +40,27 @@ jobs:
           vCores: ${{ secrets.VCORES }}
           key: ${{ env.key }}
         run: |
-          echo "Desplegando en el entorno: ${{ env.env }}"
-
           # Comando para publicar el asset en Exchange
-          echo "Intentando publicar el asset en Exchange..."
           mvn -B -s settings.xml clean -fai deploy \
             -DbusinessGroupId=${{ env.businessGroupId }} \
             -DconnectedAppClientId=${{ env.connectedAppClientId }} \
             -DconnectedAppClientSecret=${{ env.connectedAppClientSecret }} \
-            -Dkey=${{ secrets.KEY_DEV }} || echo "Proceso de publicación terminado, continuando con el despliegue..."
-
+            -Dkey=${{ secrets.KEY_DEV }}
+          
+        continue-on-error: true
+        
+      - name: Publish to Exchange
+        env:
+          businessGroupId: ${{ secrets.BUSINESS_GROUP_ID }}
+          connectedAppClientId: ${{ secrets.CONNECTED_APP_CLIENT_ID }}
+          connectedAppClientSecret: ${{ secrets.CONNECTED_APP_CLIENT_SECRET }}
+          target: ${{ secrets.TARGET }}
+          applicationName: metrodora-testcicd-${{ env.env }}
+          replicas: ${{ secrets.REPLICAS }}
+          vCores: ${{ secrets.VCORES }}
+          key: ${{ env.key }}
+        run: |
           # Comando para desplegar la aplicación
-          echo "Desplegando la aplicación en el entorno ${{ env.env }}..."
           mvn -B -s settings.xml clean deploy -DmuleDeploy \
             -DbusinessGroupId=${{ env.businessGroupId }} \
             -DconnectedAppClientId=${{ env.connectedAppClientId }} \
