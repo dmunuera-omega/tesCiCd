@@ -25,7 +25,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-${{ hashFiles('pom.xml') }}
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
           restore-keys: |
             ${{ runner.os }}-maven-
 
@@ -41,7 +41,7 @@ jobs:
           key: ${{ secrets.KEY_DEV }}
         run: |
           # Comando para publicar el asset en Exchange
-          mvn -B -s settings.xml clean -fai deploy \
+          mvn -B -s ./maven/settings.xml clean -fai deploy \
             -DbusinessGroupId=${{ env.businessGroupId }} \
             -DconnectedAppClientId=${{ env.connectedAppClientId }} \
             -DconnectedAppClientSecret=${{ env.connectedAppClientSecret }} \
@@ -61,7 +61,7 @@ jobs:
           key: ${{ secrets.KEY_DEV }}
         run: |
           # Comando para desplegar la aplicación
-          mvn -B -s settings.xml clean deploy -DmuleDeploy \
+          mvn -B -s ./maven/settings.xml clean deploy -DmuleDeploy \
             -DbusinessGroupId=${{ env.businessGroupId }} \
             -DconnectedAppClientId=${{ env.connectedAppClientId }} \
             -DconnectedAppClientSecret=${{ env.connectedAppClientSecret }} \
@@ -89,7 +89,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-${{ hashFiles('pom.xml') }}
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
           restore-keys: |
             ${{ runner.os }}-maven-
 
